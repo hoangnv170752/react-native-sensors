@@ -5,23 +5,27 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.SystemClock;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.turbomodule.core.interfaces.TurboModule;
 
-public class RNSensor extends ReactContextBaseJavaModule implements SensorEventListener {
+@ReactModule(name = RNSensorsModule.NAME)
+public class RNSensorsModule extends RNSensorsSpec implements SensorEventListener, TurboModule {
+
+  public static final String NAME = "RNSensors";
 
   private final ReactApplicationContext reactContext;
   private final SensorManager sensorManager;
-  private final Sensor sensor;
+  private Sensor sensor;
   private double lastReading = (double) System.currentTimeMillis();
   private int interval;
   private int logLevel = 0;
@@ -33,7 +37,16 @@ public class RNSensor extends ReactContextBaseJavaModule implements SensorEventL
 
   private int listenerCount = 0;
 
-  public RNSensor(ReactApplicationContext reactContext, String sensorName, int sensorType) {
+  public RNSensorsModule(ReactApplicationContext reactContext) {
+    super(reactContext);
+    this.reactContext = reactContext;
+    this.sensorManager = (SensorManager)reactContext.getSystemService(reactContext.SENSOR_SERVICE);
+    this.sensorName = NAME;
+    this.sensorType = Sensor.TYPE_ACCELEROMETER;
+    this.sensor = this.sensorManager.getDefaultSensor(this.sensorType);
+  }
+
+  public RNSensorsModule(ReactApplicationContext reactContext, String sensorName, int sensorType) {
     super(reactContext);
     this.reactContext = reactContext;
     this.sensorType = sensorType;
@@ -42,6 +55,13 @@ public class RNSensor extends ReactContextBaseJavaModule implements SensorEventL
     this.sensor = this.sensorManager.getDefaultSensor(this.sensorType);
   }
 
+  @Override
+  @NonNull
+  public String getName() {
+    return this.sensorName;
+  }
+
+  @Override
   @ReactMethod
   public void isAvailable(Promise promise) {
     if (this.sensor == null) {
@@ -51,30 +71,28 @@ public class RNSensor extends ReactContextBaseJavaModule implements SensorEventL
     promise.resolve(null);
   }
 
+  @Override
   @ReactMethod
-  public void setUpdateInterval(int newInterval) {
-    this.interval = newInterval;
+  public void setUpdateInterval(double newInterval) {
+    this.interval = (int) newInterval;
   }
 
+  @Override
   @ReactMethod
-  public void setLogLevel(int newLevel) {
-    this.logLevel = newLevel;
+  public void setLogLevel(double newLevel) {
+    this.logLevel = (int) newLevel;
   }
 
+  @Override
   @ReactMethod
   public void startUpdates() {
     sensorManager.registerListener(this, sensor, this.interval * 1000);
   }
 
+  @Override
   @ReactMethod
   public void stopUpdates() {
     sensorManager.unregisterListener(this);
-  }
-
-  @Override
-  @NonNull
-  public String getName() {
-    return this.sensorName;
   }
 
   private static double sensorTimestampToEpochMilliseconds(long elapsedTime) {
@@ -150,14 +168,16 @@ public class RNSensor extends ReactContextBaseJavaModule implements SensorEventL
   public void onAccuracyChanged(Sensor sensor, int accuracy) {
   }
 
+  @Override
   @ReactMethod
   public void addListener(String eventName) {
     this.listenerCount += 1;
   }
 
+  @Override
   @ReactMethod
-  public void removeListeners(Integer count) {
-    this.listenerCount -= count;
+  public void removeListeners(double count) {
+    this.listenerCount -= (int) count;
     if (this.sensorManager != null && this.listenerCount <= 0) {
       stopUpdates();
     }

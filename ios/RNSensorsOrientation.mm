@@ -1,21 +1,21 @@
-
-//  Orientation.m
-
+//  RNSensorsOrientation.mm
 
 #import <React/RCTBridge.h>
 #import <React/RCTEventDispatcher.h>
-#import "RNSensorsGravity.h"
+#import "RNSensorsOrientation.h"
 #import "RNSensorsUtils.h"
 
-@implementation RNSensorsGravity
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <React/RCTTurboModuleManager.h>
+#endif
 
-@synthesize bridge = _bridge;
+@implementation RNSensorsOrientation
 
 RCT_EXPORT_MODULE();
 
 - (id) init {
     self = [super init];
-    NSLog(@"RNSensorsGravity");
+    NSLog(@"RNSensorsOrientation");
 
     if (self) {
         self->_motionManager = [[CMMotionManager alloc] init];
@@ -26,7 +26,7 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents
 {
-  return @[@"RNSensorsGravity"];
+  return @[@"RNSensorsOrientation"];
 }
 
 + (BOOL)requiresMainQueueSetup
@@ -50,12 +50,12 @@ RCT_REMAP_METHOD(isAvailable,
         {
             resolve(@YES);
         } else {
-            reject(@"-1", @"Gravity is not active", nil);
+            reject(@"-1", @"Orientation is not active", nil);
         }
     }
     else
     {
-        reject(@"-1", @"Gravity is not available", nil);
+        reject(@"-1", @"Orientation is not available", nil);
     }
 }
 
@@ -87,20 +87,33 @@ RCT_EXPORT_METHOD(getUpdateInterval:(RCTResponseSenderBlock) cb) {
     cb(@[[NSNull null], [NSNumber numberWithDouble:interval]]);
 }
 
-RCT_EXPORT_METHOD(getData:(RCTResponseSenderBlock) cb) {    
-    double x = self->_motionManager.deviceMotion.gravity.x;
-    double y = self->_motionManager.deviceMotion.gravity.y;
-    double z = self->_motionManager.deviceMotion.gravity.z;
+RCT_EXPORT_METHOD(getData:(RCTResponseSenderBlock) cb) {
+    CMAttitude *attitude = self->_motionManager.deviceMotion.attitude;
+    
+    double qx = attitude.quaternion.x;
+    double qy = attitude.quaternion.y;
+    double qz = attitude.quaternion.z;
+    double qw = attitude.quaternion.w;
+
+    double pitch = attitude.pitch;
+    double roll = attitude.roll;
+    double yaw = attitude.yaw;
+
     double timestamp = [RNSensorsUtils sensorTimestampToEpochMilliseconds:self->_motionManager.deviceMotion.timestamp];
 
     if (self->logLevel > 0) {
-        NSLog(@"getData: %f, %f, %f, %f", x, y, z, timestamp);
+        NSLog(@"getData pitch/roll/yaw: %f, %f, %f, %f", pitch, roll, yaw, timestamp);
+        NSLog(@"getData quaternion: %f, %f, %f, %f %f", qx, qy, qz, qw, timestamp);
     }
 
     cb(@[[NSNull null], @{
-                 @"x" : [NSNumber numberWithDouble:x],
-                 @"y" : [NSNumber numberWithDouble:y],
-                 @"z" : [NSNumber numberWithDouble:z],
+                 @"pitch" : [NSNumber numberWithDouble:pitch],
+                 @"roll" : [NSNumber numberWithDouble:roll],
+                 @"yaw" : [NSNumber numberWithDouble:yaw],
+                 @"qx" : [NSNumber numberWithDouble:qx],
+                 @"qy" : [NSNumber numberWithDouble:qy],
+                 @"qz" : [NSNumber numberWithDouble:qz],
+                 @"qw" : [NSNumber numberWithDouble:qw],
                  @"timestamp" : [NSNumber numberWithDouble:timestamp]
              }]
        );
@@ -108,30 +121,41 @@ RCT_EXPORT_METHOD(getData:(RCTResponseSenderBlock) cb) {
 
 RCT_EXPORT_METHOD(startUpdates) {
     if (self->logLevel > 0) {
-        NSLog(@"startUpdates/startGravityUpdates");
+        NSLog(@"startUpdates/startOrientationUpdates");
     }
 
     [self->_motionManager setShowsDeviceMovementDisplay:YES];
 
     /* Receive the orientation data on this block */
-    [self->_motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue]
-                                               withHandler:^(CMDeviceMotion *deviceMotion, NSError *error)
+		NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+    [self->_motionManager startDeviceMotionUpdatesToQueue:queue withHandler:^(CMDeviceMotion *deviceMotion, NSError *error)
      {
+         CMAttitude *attitude = deviceMotion.attitude;
+         
+         double qx = attitude.quaternion.x;
+         double qy = attitude.quaternion.y;
+         double qz = attitude.quaternion.z;
+         double qw = attitude.quaternion.w;
 
-        double x = deviceMotion.gravity.x;
-        double y = deviceMotion.gravity.y;
-        double z = deviceMotion.gravity.z;
+         double pitch = attitude.pitch;
+         double roll = attitude.roll;
+         double yaw = attitude.yaw;
 
          double timestamp = [RNSensorsUtils sensorTimestampToEpochMilliseconds:deviceMotion.timestamp];
 
          if (self->logLevel > 1) {
-             NSLog(@"Updated gravity values: %f, %f, %f, %f", x, y, z, timestamp);
+             NSLog(@"Updated device motion pitch/roll/yaw: %f, %f, %f, %f", pitch, roll, yaw, timestamp);
+             NSLog(@"Updated device motion quaternion: %f, %f, %f, %f %f", qx, qy, qz, qw, timestamp);
          }
 
-         [self sendEventWithName:@"RNSensorsGravity" body:@{
-                                                           @"x" : [NSNumber numberWithDouble:x],
-                                                           @"y" : [NSNumber numberWithDouble:y],
-                                                           @"z" : [NSNumber numberWithDouble:z],
+         [self sendEventWithName:@"RNSensorsOrientation" body:@{
+                                                           @"pitch" : [NSNumber numberWithDouble:pitch],
+                                                           @"roll" : [NSNumber numberWithDouble:roll],
+                                                           @"yaw" : [NSNumber numberWithDouble:yaw],
+                                                           @"qx" : [NSNumber numberWithDouble:qx],
+                                                           @"qy" : [NSNumber numberWithDouble:qy],
+                                                           @"qz" : [NSNumber numberWithDouble:qz],
+                                                           @"qw" : [NSNumber numberWithDouble:qw],
                                                            @"timestamp" : [NSNumber numberWithDouble:timestamp]
                                                        }];
      }];
@@ -161,5 +185,13 @@ RCT_EXPORT_METHOD(stopUpdates) {
         [self stopUpdates];
     }
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeSensorsOrientationSpecJSI>(params);
+}
+#endif
 
 @end

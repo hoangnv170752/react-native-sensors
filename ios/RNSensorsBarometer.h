@@ -1,10 +1,19 @@
 // Inspired by https://github.com/pwmckenna/react-native-motion-manager
 
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <RNSensorsSpec/RNSensorsSpec.h>
+#endif
+
 #import <React/RCTBridgeModule.h>
 #import <CoreMotion/CoreMotion.h>
 #import <React/RCTEventEmitter.h>
 
-@interface RNSensorsBarometer : RCTEventEmitter <RCTBridgeModule> {
+#ifdef RCT_NEW_ARCH_ENABLED
+@interface RNSensorsBarometer : RCTEventEmitter <NativeSensorsBarometerSpec>
+#else
+@interface RNSensorsBarometer : RCTEventEmitter <RCTBridgeModule>
+#endif
+{
     CMAltimeter *_altimeter;
     int logLevel;
     bool hasListeners;

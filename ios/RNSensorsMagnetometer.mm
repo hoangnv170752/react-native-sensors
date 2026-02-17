@@ -1,18 +1,21 @@
-// Inspired by https://github.com/pwmckenna/react-native-motion-manager
+//  RNSensorsMagnetometer.mm
 
-#import "RNSensorsGyroscope.h"
 #import <React/RCTBridge.h>
 #import <React/RCTEventDispatcher.h>
+#import "RNSensorsMagnetometer.h"
 #import "RNSensorsUtils.h"
 
-@implementation RNSensorsGyroscope
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <React/RCTTurboModuleManager.h>
+#endif
 
-@synthesize bridge = _bridge;
+@implementation RNSensorsMagnetometer
+
 RCT_EXPORT_MODULE();
 
 - (id) init {
     self = [super init];
-    NSLog(@"RNSensorsGyroscope");
+    NSLog(@"RNSensorsMagnetometer");
 
     if (self) {
         self->_motionManager = [[CMMotionManager alloc] init];
@@ -23,7 +26,7 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents
 {
-  return @[@"RNSensorsGyroscope"];
+  return @[@"RNSensorsMagnetometer"];
 }
 
 + (BOOL)requiresMainQueueSetup
@@ -35,24 +38,24 @@ RCT_REMAP_METHOD(isAvailable,
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject) {
     return [self isAvailableWithResolver:resolve
-                                rejecter:reject];
+                               rejecter:reject];
 }
 
 - (void) isAvailableWithResolver:(RCTPromiseResolveBlock) resolve
                         rejecter:(RCTPromiseRejectBlock) reject {
-    if([self->_motionManager isGyroAvailable])
+    if([self->_motionManager isMagnetometerAvailable])
     {
         /* Start the accelerometer if it is not active already */
-        if([self->_motionManager isGyroActive] == NO)
+        if([self->_motionManager isMagnetometerActive] == NO)
         {
             resolve(@YES);
         } else {
-            reject(@"-1", @"Gyroscope is not active", nil);
+            reject(@"-1", @"Magnetometer is not active", nil);
         }
     }
     else
     {
-        reject(@"-1", @"Gyroscope is not available", nil);
+        reject(@"-1", @"Magnetometer is not available", nil);
     }
 }
 
@@ -63,7 +66,7 @@ RCT_EXPORT_METHOD(setUpdateInterval:(double) interval) {
 
     double intervalInSeconds = interval / 1000;
 
-    [self->_motionManager setGyroUpdateInterval:intervalInSeconds];
+    [self->_motionManager setMagnetometerUpdateInterval:intervalInSeconds];
 }
 
 RCT_EXPORT_METHOD(setLogLevel:(int) level) {
@@ -75,7 +78,7 @@ RCT_EXPORT_METHOD(setLogLevel:(int) level) {
 }
 
 RCT_EXPORT_METHOD(getUpdateInterval:(RCTResponseSenderBlock) cb) {
-    double interval = self->_motionManager.gyroUpdateInterval;
+    double interval = self->_motionManager.magnetometerUpdateInterval;
 
     if (self->logLevel > 0) {
         NSLog(@"getUpdateInterval: %f", interval);
@@ -85,10 +88,10 @@ RCT_EXPORT_METHOD(getUpdateInterval:(RCTResponseSenderBlock) cb) {
 }
 
 RCT_EXPORT_METHOD(getData:(RCTResponseSenderBlock) cb) {
-    double x = self->_motionManager.gyroData.rotationRate.x;
-    double y = self->_motionManager.gyroData.rotationRate.y;
-    double z = self->_motionManager.gyroData.rotationRate.z;
-    double timestamp = [RNSensorsUtils sensorTimestampToEpochMilliseconds:self->_motionManager.gyroData.timestamp];
+    double x = self->_motionManager.magnetometerData.magneticField.x;
+    double y = self->_motionManager.magnetometerData.magneticField.y;
+    double z = self->_motionManager.magnetometerData.magneticField.z;
+    double timestamp = [RNSensorsUtils sensorTimestampToEpochMilliseconds:self->_motionManager.magnetometerData.timestamp];
 
     if (self->logLevel > 0) {
         NSLog(@"getData: %f, %f, %f, %f", x, y, z, timestamp);
@@ -105,30 +108,30 @@ RCT_EXPORT_METHOD(getData:(RCTResponseSenderBlock) cb) {
 
 RCT_EXPORT_METHOD(startUpdates) {
     if (self->logLevel > 0) {
-        NSLog(@"startUpdates/startGyroUpdates");
+        NSLog(@"startUpdates/startMagnetometerUpdates");
     }
 
-    [self->_motionManager startGyroUpdates];
+    [self->_motionManager startMagnetometerUpdates];
 
-    /* Receive the gyroscope data on this block */
-    [self->_motionManager startGyroUpdatesToQueue:[NSOperationQueue mainQueue]
-                                      withHandler:^(CMGyroData *gyroData, NSError *error)
+    /* Receive the magnetometer data on this block */
+    [self->_motionManager startMagnetometerUpdatesToQueue:[NSOperationQueue mainQueue]
+                                               withHandler:^(CMMagnetometerData *magnetometerData, NSError *error)
      {
-         double x = gyroData.rotationRate.x;
-         double y = gyroData.rotationRate.y;
-         double z = gyroData.rotationRate.z;
-         double timestamp = [RNSensorsUtils sensorTimestampToEpochMilliseconds:gyroData.timestamp];
+         double x = magnetometerData.magneticField.x;
+         double y = magnetometerData.magneticField.y;
+         double z = magnetometerData.magneticField.z;
+         double timestamp = [RNSensorsUtils sensorTimestampToEpochMilliseconds:magnetometerData.timestamp];
 
          if (self->logLevel > 1) {
-             NSLog(@"Updated gyro values: %f, %f, %f, %f", x, y, z, timestamp);
+             NSLog(@"Updated magnetometer values: %f, %f, %f, %f", x, y, z, timestamp);
          }
 
-         [self sendEventWithName:@"RNSensorsGyroscope" body:@{
-                                                         @"x" : [NSNumber numberWithDouble:x],
-                                                         @"y" : [NSNumber numberWithDouble:y],
-                                                         @"z" : [NSNumber numberWithDouble:z],
-                                                         @"timestamp" : [NSNumber numberWithDouble:timestamp]
-                                                     }];
+         [self sendEventWithName:@"RNSensorsMagnetometer" body:@{
+                                                           @"x" : [NSNumber numberWithDouble:x],
+                                                           @"y" : [NSNumber numberWithDouble:y],
+                                                           @"z" : [NSNumber numberWithDouble:z],
+                                                           @"timestamp" : [NSNumber numberWithDouble:timestamp]
+                                                       }];
      }];
 
 }
@@ -138,7 +141,7 @@ RCT_EXPORT_METHOD(stopUpdates) {
         NSLog(@"stopUpdates");
     }
 
-    [self->_motionManager stopGyroUpdates];
+    [self->_motionManager stopMagnetometerUpdates];
 }
 
 // Will be called when this module's first listener is added.
@@ -156,5 +159,13 @@ RCT_EXPORT_METHOD(stopUpdates) {
         [self stopUpdates];
     }
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeSensorsMagnetometerSpecJSI>(params);
+}
+#endif
 
 @end

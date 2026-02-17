@@ -1,6 +1,6 @@
 require 'json'
 
-package = JSON.parse(File.read('./package.json'))
+package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
 
 Pod::Spec.new do |s|
   s.name                = 'RNSensors'
@@ -10,9 +10,14 @@ Pod::Spec.new do |s|
   s.homepage            = package['homepage']
   s.license             = package['license']
   s.author              = package['author']
-  s.source              = { :git => "https://github.com/react-native-sensors/react-native-sensors.git" }
-  s.platform            = :ios, "7.0"
-  s.source_files        = "ios/*.{h,m}"
+  s.source              = { :git => "https://github.com/react-native-sensors/react-native-sensors.git", :tag => "v#{s.version}" }
+  s.platforms           = { :ios => "13.4" }
+  s.source_files        = "ios/**/*.{h,m,mm}"
   s.preserve_paths      = "*.js"
-  s.dependency 'React-Core'
+
+  if respond_to?(:install_modules_dependencies, true)
+    install_modules_dependencies(s)
+  else
+    s.dependency 'React-Core'
+  end
 end

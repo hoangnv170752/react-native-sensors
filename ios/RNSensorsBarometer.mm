@@ -1,5 +1,4 @@
-//  Barometer.m
-
+//  Barometer.mm
 
 #import "RNSensorsBarometer.h"
 #import <React/RCTBridge.h>
@@ -7,9 +6,11 @@
 #import <CoreMotion/CoreMotion.h>
 #import "RNSensorsUtils.h"
 
-@implementation RNSensorsBarometer
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <React/RCTTurboModuleManager.h>
+#endif
 
-@synthesize bridge = _bridge;
+@implementation RNSensorsBarometer
 
 RCT_EXPORT_MODULE();
 
@@ -137,5 +138,13 @@ RCT_EXPORT_METHOD(stopUpdates) {
         [self stopUpdates];
     }
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeSensorsBarometerSpecJSI>(params);
+}
+#endif
 
 @end

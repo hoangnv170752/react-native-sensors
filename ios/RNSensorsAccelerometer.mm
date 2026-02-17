@@ -1,14 +1,15 @@
-//  Accelerometer.m
-
+//  Accelerometer.mm
 
 #import <React/RCTBridge.h>
 #import <React/RCTEventDispatcher.h>
 #import "RNSensorsAccelerometer.h"
 #import "RNSensorsUtils.h"
 
-@implementation RNSensorsAccelerometer
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <React/RCTTurboModuleManager.h>
+#endif
 
-@synthesize bridge = _bridge;
+@implementation RNSensorsAccelerometer
 
 RCT_EXPORT_MODULE();
 
@@ -158,5 +159,13 @@ RCT_EXPORT_METHOD(stopUpdates) {
         [self stopUpdates];
     }
 }
+
+#ifdef RCT_NEW_ARCH_ENABLED
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeSensorsAccelerometerSpecJSI>(params);
+}
+#endif
 
 @end

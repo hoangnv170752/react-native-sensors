@@ -1,10 +1,19 @@
 // Inspired by https://github.com/pwmckenna/react-native-motion-manager
 
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <RNSensorsSpec/RNSensorsSpec.h>
+#endif
+
 #import <React/RCTBridgeModule.h>
 #import <CoreMotion/CoreMotion.h>
 #import <React/RCTEventEmitter.h>
 
-@interface RNSensorsOrientation : RCTEventEmitter <RCTBridgeModule> {
+#ifdef RCT_NEW_ARCH_ENABLED
+@interface RNSensorsOrientation : RCTEventEmitter <NativeSensorsOrientationSpec>
+#else
+@interface RNSensorsOrientation : RCTEventEmitter <RCTBridgeModule>
+#endif
+{
     CMMotionManager *_motionManager;
     int logLevel;
     bool hasListeners;

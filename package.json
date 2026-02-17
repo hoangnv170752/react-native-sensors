@@ -50,8 +50,8 @@
   "license": "MIT",
   "peerDependencies": {
     "prop-types": "^15.6.0",
-    "react-native": ">=0.39.0",
-    "react-native-windows": "^0.68.15"
+    "react": ">=18.2.0",
+    "react-native": ">=0.73.0"
   },
   "dependencies": {
     "rxjs": ">= 6"
@@ -63,11 +63,11 @@
     "babel-preset-react-native": "4.0.0",
     "husky": "4.2.3",
     "jest": "24.1.0",
-    "metro-config": "^0.67.0",
+    "metro-config": "^0.80.0",
     "prettier": "2.2.1",
     "pretty-quick": "3.1.0",
-    "react": "^17.0.2",
-    "react-native": "^0.68.0",
+    "react": "^18.3.1",
+    "react-native": "^0.84.0",
     "regenerator-runtime": "0.13.1",
     "rxjs-marbles": "5.0.0",
     "semantic-release": "17.3.9",
@@ -84,5 +84,6 @@
     "/README.md",
     "/scripts/",
     "/website/"
-  ]
+  ],
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

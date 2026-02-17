@@ -5,8 +5,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.SystemClock;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
@@ -17,7 +17,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-public class RNSensor extends ReactContextBaseJavaModule implements SensorEventListener {
+public class RNSensorsModule extends ReactContextBaseJavaModule implements SensorEventListener {
 
   private final ReactApplicationContext reactContext;
   private final SensorManager sensorManager;
@@ -33,13 +33,19 @@ public class RNSensor extends ReactContextBaseJavaModule implements SensorEventL
 
   private int listenerCount = 0;
 
-  public RNSensor(ReactApplicationContext reactContext, String sensorName, int sensorType) {
+  public RNSensorsModule(ReactApplicationContext reactContext, String sensorName, int sensorType) {
     super(reactContext);
     this.reactContext = reactContext;
     this.sensorType = sensorType;
     this.sensorName = sensorName;
     this.sensorManager = (SensorManager)reactContext.getSystemService(reactContext.SENSOR_SERVICE);
     this.sensor = this.sensorManager.getDefaultSensor(this.sensorType);
+  }
+
+  @Override
+  @NonNull
+  public String getName() {
+    return this.sensorName;
   }
 
   @ReactMethod
@@ -69,12 +75,6 @@ public class RNSensor extends ReactContextBaseJavaModule implements SensorEventL
   @ReactMethod
   public void stopUpdates() {
     sensorManager.unregisterListener(this);
-  }
-
-  @Override
-  @NonNull
-  public String getName() {
-    return this.sensorName;
   }
 
   private static double sensorTimestampToEpochMilliseconds(long elapsedTime) {
