@@ -13,6 +13,7 @@ Pod::Spec.new do |s|
   s.source              = { :git => "https://github.com/react-native-sensors/react-native-sensors.git", :tag => "v#{s.version}" }
   s.platforms           = { :ios => "13.4" }
   s.source_files        = "ios/**/*.{h,m,mm}"
+  s.exclude_files       = "ios/RNSensors.xcodeproj/**"
   s.preserve_paths      = "*.js"
 
   if respond_to?(:install_modules_dependencies, true)
