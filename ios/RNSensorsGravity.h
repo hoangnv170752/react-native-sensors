@@ -4,7 +4,6 @@
 #import <RNSensorsSpec/RNSensorsSpec.h>
 #endif
 
-#import <React/RCTBridgeModule.h>
 #import <CoreMotion/CoreMotion.h>
 #import <React/RCTEventEmitter.h>
 
