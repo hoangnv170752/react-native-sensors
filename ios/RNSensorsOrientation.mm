@@ -1,7 +1,5 @@
 //  RNSensorsOrientation.mm
 
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
 #import "RNSensorsOrientation.h"
 #import "RNSensorsUtils.h"
 

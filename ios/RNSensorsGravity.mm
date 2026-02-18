@@ -1,7 +1,5 @@
 //  RNSensorsGravity.mm
 
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
 #import "RNSensorsGravity.h"
 #import "RNSensorsUtils.h"
 

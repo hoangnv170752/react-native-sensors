@@ -1,7 +1,5 @@
 //  RNSensorsMagnetometer.mm
 
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
 #import "RNSensorsMagnetometer.h"
 #import "RNSensorsUtils.h"
 

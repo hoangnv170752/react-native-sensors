@@ -1,8 +1,6 @@
 // Inspired by https://github.com/pwmckenna/react-native-motion-manager
 
 #import "RNSensorsGyroscope.h"
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
 #import "RNSensorsUtils.h"
 
 #ifdef RCT_NEW_ARCH_ENABLED
