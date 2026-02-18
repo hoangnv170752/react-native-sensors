@@ -15,6 +15,7 @@ Pod::Spec.new do |s|
   s.source_files        = "ios/**/*.{h,m,mm}"
   s.exclude_files       = "ios/RNSensors.xcodeproj/**"
   s.preserve_paths      = "*.js"
+  s.frameworks          = "CoreMotion"
 
   if respond_to?(:install_modules_dependencies, true)
     install_modules_dependencies(s)

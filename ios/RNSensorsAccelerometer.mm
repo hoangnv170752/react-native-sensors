@@ -4,7 +4,7 @@
 #import "RNSensorsUtils.h"
 
 #ifdef RCT_NEW_ARCH_ENABLED
-#import <React/RCTTurboModuleManager.h>
+#import <ReactCommon/RCTTurboModuleManager.h>
 #endif
 
 @implementation RNSensorsAccelerometer
@@ -32,9 +32,8 @@ RCT_EXPORT_MODULE();
   return @[@"RNSensorsAccelerometer"];
 }
 
-RCT_REMAP_METHOD(isAvailable,
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject) {
+- (void)isAvailable:(RCTPromiseResolveBlock)resolve
+               reject:(RCTPromiseRejectBlock)reject {
     return [self isAvailableWithResolver:resolve
                                 rejecter:reject];
 }
@@ -67,9 +66,9 @@ RCT_EXPORT_METHOD(setUpdateInterval:(double) interval) {
     [self->_motionManager setAccelerometerUpdateInterval:intervalInSeconds];
 }
 
-RCT_EXPORT_METHOD(setLogLevel:(int) level) {
+RCT_EXPORT_METHOD(setLogLevel:(double) level) {
     if (level > 0) {
-        NSLog(@"setLogLevel: %d", level);
+        NSLog(@"setLogLevel: %f", level);
     }
 
     self->logLevel = level;
@@ -141,6 +140,7 @@ RCT_EXPORT_METHOD(stopUpdates) {
 
     [self->_motionManager stopAccelerometerUpdates];
 }
+
 
 // Will be called when this module's first listener is added.
 -(void)startObserving {

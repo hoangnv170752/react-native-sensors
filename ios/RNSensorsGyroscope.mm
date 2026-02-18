@@ -4,7 +4,7 @@
 #import "RNSensorsUtils.h"
 
 #ifdef RCT_NEW_ARCH_ENABLED
-#import <React/RCTTurboModuleManager.h>
+#import <ReactCommon/RCTTurboModuleManager.h>
 #endif
 
 @implementation RNSensorsGyroscope
@@ -32,9 +32,8 @@ RCT_EXPORT_MODULE();
     return NO;
 }
 
-RCT_REMAP_METHOD(isAvailable,
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject) {
+- (void)isAvailable:(RCTPromiseResolveBlock)resolve
+               reject:(RCTPromiseRejectBlock)reject {
     return [self isAvailableWithResolver:resolve
                                 rejecter:reject];
 }
@@ -67,7 +66,7 @@ RCT_EXPORT_METHOD(setUpdateInterval:(double) interval) {
     [self->_motionManager setGyroUpdateInterval:intervalInSeconds];
 }
 
-RCT_EXPORT_METHOD(setLogLevel:(int) level) {
+RCT_EXPORT_METHOD(setLogLevel:(double) level) {
     if (level > 0) {
         NSLog(@"setLogLevel: %f", level);
     }
@@ -141,6 +140,7 @@ RCT_EXPORT_METHOD(stopUpdates) {
 
     [self->_motionManager stopGyroUpdates];
 }
+
 
 // Will be called when this module's first listener is added.
 -(void)startObserving {

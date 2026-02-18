@@ -1,16 +1,20 @@
-import { NativeEventEmitter, NativeModules } from "react-native";
+import { NativeEventEmitter, NativeModules, TurboModuleRegistry } from "react-native";
 import { Observable } from "rxjs";
-import { publish, refCount } from "rxjs/operators";
+import { share } from "rxjs/operators";
 import * as RNSensors from "./rnsensors";
 
-const {
-  RNSensorsGyroscope: GyroNative,
-  RNSensorsAccelerometer: AccNative,
-  RNSensorsMagnetometer: MagnNative,
-  RNSensorsBarometer: BarNative,
-  RNSensorsOrientation: OrientNative,
-  RNSensorsGravity: GravNative,
-} = NativeModules;
+function getModule(name) {
+  return TurboModuleRegistry
+    ? TurboModuleRegistry.get(name)
+    : NativeModules[name];
+}
+
+const AccNative = getModule('RNSensorsAccelerometer');
+const GyroNative = getModule('RNSensorsGyroscope');
+const MagnNative = getModule('RNSensorsMagnetometer');
+const BarNative = getModule('RNSensorsBarometer');
+const OrientNative = getModule('RNSensorsOrientation');
+const GravNative = getModule('RNSensorsGravity');
 
 const listenerKeys = new Map([
   ["accelerometer", "RNSensorsAccelerometer"],
@@ -41,10 +45,10 @@ const eventEmitterSubscription = new Map([
 
 function createSensorObservable(sensorType) {
   return Observable.create(function subscribe(observer) {
-    this.isSensorAvailable = false;
+    let isSensorAvailable = false;
 
-    this.unsubscribeCallback = () => {
-      if (!this.isSensorAvailable) return;
+    const unsubscribeCallback = () => {
+      if (!isSensorAvailable) return;
       if (eventEmitterSubscription.get(sensorType)) eventEmitterSubscription.get(sensorType).remove();
       // stop the sensor
       RNSensors.stop(sensorType);
@@ -52,7 +56,7 @@ function createSensorObservable(sensorType) {
 
     RNSensors.isAvailable(sensorType).then(
       () => {
-        this.isSensorAvailable = true;
+        isSensorAvailable = true;
 
         const emitter = new NativeEventEmitter(nativeApis.get(sensorType));
 
@@ -71,13 +75,13 @@ function createSensorObservable(sensorType) {
       }
     );
 
-    return this.unsubscribeCallback;
+    return unsubscribeCallback;
   }).pipe(makeSingleton());
 }
 
 // As we only have one sensor we need to share it between the different consumers
 function makeSingleton() {
-  return (source) => source.pipe(publish(), refCount());
+  return (source) => source.pipe(share());
 }
 
 const accelerometer = createSensorObservable("accelerometer");

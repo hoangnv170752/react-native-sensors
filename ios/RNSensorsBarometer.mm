@@ -5,7 +5,7 @@
 #import "RNSensorsUtils.h"
 
 #ifdef RCT_NEW_ARCH_ENABLED
-#import <React/RCTTurboModuleManager.h>
+#import <ReactCommon/RCTTurboModuleManager.h>
 #endif
 
 @implementation RNSensorsBarometer
@@ -33,9 +33,8 @@ RCT_EXPORT_MODULE();
     return NO;
 }
 
-RCT_REMAP_METHOD(isAvailable,
-                 resolver:(RCTPromiseResolveBlock)resolve
-                 rejecter:(RCTPromiseRejectBlock)reject) {
+- (void)isAvailable:(RCTPromiseResolveBlock)resolve
+               reject:(RCTPromiseRejectBlock)reject {
     return [self isAvailableWithResolver:resolve
                                 rejecter:reject];
 }
@@ -57,7 +56,7 @@ RCT_EXPORT_METHOD(setUpdateInterval:(double) interval) {
     NSLog(@"Can not set update interval for barometer, doing nothing");
 }
 
-RCT_EXPORT_METHOD(setLogLevel:(int) level) {
+RCT_EXPORT_METHOD(setLogLevel:(double) level) {
     if (level > 0) {
         NSLog(@"setLogLevel: %f", level);
     }
@@ -71,7 +70,7 @@ RCT_EXPORT_METHOD(getUpdateInterval:(RCTResponseSenderBlock) cb) {
 }
 
 RCT_EXPORT_METHOD(getData:(RCTResponseSenderBlock) cb) {
-    CMAltitudeData * _Nullable altitudeData = self->_altimeter;
+    CMAltitudeData *altitudeData = self->_lastAltitudeData;
     if (altitudeData) {
         if (self->logLevel > 0) {
             NSLog(@"getData: %f, %f, %f", altitudeData.pressure.doubleValue, altitudeData.timestamp, [RNSensorsUtils sensorTimestampToEpochMilliseconds:altitudeData.timestamp]);
@@ -100,6 +99,7 @@ RCT_EXPORT_METHOD(startUpdates) {
         }
 
         if (altitudeData) {
+            self->_lastAltitudeData = altitudeData;
             if (self->logLevel > 1) {
                 NSLog(@"Updated altitue value: %f, %f, %f", altitudeData.pressure.doubleValue, altitudeData.timestamp, [RNSensorsUtils sensorTimestampToEpochMilliseconds:altitudeData.timestamp]);
             }
@@ -120,6 +120,7 @@ RCT_EXPORT_METHOD(stopUpdates) {
 
     [self->_altimeter stopRelativeAltitudeUpdates];
 }
+
 
 // Will be called when this module's first listener is added.
 -(void)startObserving {

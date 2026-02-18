@@ -14,6 +14,7 @@
 #endif
 {
     CMAltimeter *_altimeter;
+    CMAltitudeData *_lastAltitudeData;
     int logLevel;
     bool hasListeners;
 }
@@ -22,7 +23,7 @@
          rejecter:(RCTPromiseRejectBlock) reject;
 - (void) setUpdateInterval:(double) interval;
 - (void) getUpdateInterval:(RCTResponseSenderBlock) cb;
-- (void) setLogLevel:(int) level;
+- (void) setLogLevel:(double) level;
 - (void) getData:(RCTResponseSenderBlock) cb;
 - (void) startUpdates;
 - (void) stopUpdates;

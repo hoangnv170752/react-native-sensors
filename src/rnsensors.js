@@ -1,12 +1,17 @@
-import { NativeModules } from "react-native";
-const {
-  RNSensorsGyroscope: GyroNative,
-  RNSensorsAccelerometer: AccNative,
-  RNSensorsMagnetometer: MagnNative,
-  RNSensorsBarometer: BarNative,
-  RNSensorsOrientation: OrientNative,
-  RNSensorsGravity: GravNative,
-} = NativeModules;
+import { NativeModules, TurboModuleRegistry } from "react-native";
+
+function getModule(name) {
+  return TurboModuleRegistry
+    ? TurboModuleRegistry.get(name)
+    : NativeModules[name];
+}
+
+const AccNative = getModule('RNSensorsAccelerometer');
+const GyroNative = getModule('RNSensorsGyroscope');
+const MagnNative = getModule('RNSensorsMagnetometer');
+const BarNative = getModule('RNSensorsBarometer');
+const OrientNative = getModule('RNSensorsOrientation');
+const GravNative = getModule('RNSensorsGravity');
 
 if (!GyroNative && !AccNative && !MagnNative && !BarNative && !OrientNative && !GravNative) {
   throw new Error("Native modules for sensors not available. Did react-native link run successfully?");
